@@ -11,31 +11,34 @@ from moviepy.editor import ImageClip, AudioFileClip
 import requests
 from moviepy.editor import VideoFileClip, concatenate_videoclips
 from PIL import Image, ImageDraw, ImageFont
+from fastapi.responses import FileResponse
+from fastapi import HTTPException
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
 tts = TTS(model_path="xtts_v2", config_path="xtts_v2/config.json").to(device)
 
 model = "gpt-4-0125-preview"
-client = OpenAI(api_key="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")
 
 
 class StoryBody(BaseModel):
     subject: str
     mood: str
     style: str
+    openaiApiKey: str
 
 
 app = FastAPI()
 
-
 @app.post("/create")
 async def create_story_video(story_body: StoryBody):
-    story = await create_story(story_body)
-    background_music_id = get_background_music_id(f"A {story_body.mood} story about ${story_body.subject}")
-    create_video(story, background_music_id, story_body.style, story_body.subject)
+    client = OpenAI(api_key=story_body.openaiApiKey)
+    story = await create_story(story_body, client)
+    background_music_id = get_background_music_id(f"A {story_body.mood} story about ${story_body.subject}", client)
+    create_video(story, background_music_id, story_body.style, story_body.subject, client)
+    return FileResponse("merged_videos.mp4", media_type='video/mp4', filename='merged_videos.mp4')
 
 
-async def create_story(story_body):
+async def create_story(story_body, client):
     user_prompt = f"Please write a {story_body.mood} story about ${story_body.subject}"
     completion = client.chat.completions.create(
         model=model,
@@ -47,14 +50,14 @@ async def create_story(story_body):
     return story
 
 
-def get_background_music_id(subject):
+def get_background_music_id(subject, client):
     similarities = {}
     with open("./music/vectors.json", "r") as file:
         vectors = json.load(file)
     with open("./music/index.json", "r") as file:
         index = json.load(file)
 
-    subject_vector = get_vector(subject)
+    subject_vector = get_vector(subject, client)
     for description, vector in vectors.items():
         similarities[description] = cosine_similarity(vector, subject_vector)
     similarities = sorted(similarities.items(), key=lambda item: item[1], reverse=True)
@@ -65,12 +68,12 @@ def cosine_similarity(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
 
 
-def get_vector(text, model="text-embedding-3-small"):
+def get_vector(text, client, model="text-embedding-3-small"):
     text = text.replace("\n", " ")
     return client.embeddings.create(input=[text], model=model).data[0].embedding
 
 
-def create_video(story, background_music_id, style, subject):
+def create_video(story, background_music_id, style, subject, client):
     story_sentences = story.split(".")
     count = 0
     for sentence in story_sentences:
@@ -79,7 +82,7 @@ def create_video(story, background_music_id, style, subject):
             sentence_file_path = f"sentences/sentence{count}.wav"
             image_file_path = f"images/image{count}.png"
             clip_file_path = f"clips/clip{count}.mp4"
-            create_image(sentence, image_file_path, style, subject)
+            create_image(sentence, image_file_path, style, subject, client)
             create_video_with_speech(sentence, image_file_path, sentence_file_path, clip_file_path)
             count = count + 1
             print("done")
@@ -96,7 +99,7 @@ def create_video(story, background_music_id, style, subject):
     concatenated_clip.write_videofile("merged_videos.mp4", codec='libx264', audio_codec='aac', fps=24)
 
 
-def create_image(sentence, image_path, style, context):
+def create_image(sentence, image_path, style, context, client):
     response = client.images.generate(
         model="dall-e-3",
         prompt=f"style: {style}; sentence: {sentence}; context:{context}",
