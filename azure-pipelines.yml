@@ -13,7 +13,7 @@ variables:
   vmImageName: 'ubuntu-latest'
   aciResourceGroup: 'ai_development'
   aciName: 'storymaker'
-  azureResourceManagerConnection: ''azureResourceManagerConnection'  
+  azureResourceManagerConnection: 'azureResourceManagerConnection'  
 
 
 stages:
