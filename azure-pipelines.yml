@@ -68,5 +68,6 @@ stages:
                   --image $(containerRegistry)/$(imageRepository):$(tag) \
                   --dns-name-label $(aciName)-dns \
                   --ports 80 443 \
-                  --registry-username $(acrUsername)
+                  --registry-username $(acrUsername) \
+                  --registry-password $(acrPassword)
 
