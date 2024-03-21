@@ -13,6 +13,8 @@ variables:
   vmImageName: 'ubuntu-latest'
   aciResourceGroup: 'ai_development'
   aciName: 'storymaker'
+  azureResourceManagerConnection: ''azureResourceManagerConnection'  
+
 
 stages:
 - stage: BuildAndPush
@@ -38,7 +40,6 @@ stages:
         containerRegistry: $(dockerRegistryServiceConnection)
         tags: |
           $(tag)
-        # Enable Docker layer caching (if supported by your pipeline agent)
         cache: true
 
 - stage: RunOnACI
@@ -48,7 +49,7 @@ stages:
   jobs:
   - deployment: DeployToACI
     displayName: 'Deploy to ACI'
-    environment: 'production'  # Define your environment
+    environment: 'production'  
     strategy:
       runOnce:
         deploy:
@@ -56,7 +57,7 @@ stages:
           - task: AzureCLI@2
             displayName: 'Run Image on ACI'
             inputs:
-              azureSubscription: $(dockerRegistryServiceConnection)
+              azureSubscription: $(azureResourceManagerConnection)
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
@@ -65,4 +66,4 @@ stages:
                   --name $(aciName) \
                   --image $(containerRegistry)/$(imageRepository):$(tag) \
                   --dns-name-label $(aciName)-dns \
-                  --ports 80 443
+	                  --ports 80 443
