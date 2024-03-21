@@ -14,6 +14,7 @@ variables:
   aciResourceGroup: 'ai_development'
   aciName: 'storymaker'
   azureResourceManagerConnection: 'azureResourceManagerConnection'
+  acrUsername: 'mor.ilay@post.runi.ac.il'
 
 
 stages:
@@ -67,3 +68,5 @@ stages:
                   --image $(containerRegistry)/$(imageRepository):$(tag) \
                   --dns-name-label $(aciName)-dns \
                   --ports 80 443
+                  --registry-username $(acrUsername) \
+
