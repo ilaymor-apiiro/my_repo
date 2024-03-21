@@ -13,7 +13,7 @@ variables:
   vmImageName: 'ubuntu-latest'
   aciResourceGroup: 'ai_development'
   aciName: 'storymaker'
-  azureResourceManagerConnection: 'azureResourceManagerConnection'  
+  azureResourceManagerConnection: 'azureResourceManagerConnection'
 
 
 stages:
@@ -49,7 +49,7 @@ stages:
   jobs:
   - deployment: DeployToACI
     displayName: 'Deploy to ACI'
-    environment: 'production'  
+    environment: 'production'
     strategy:
       runOnce:
         deploy:
@@ -66,4 +66,4 @@ stages:
                   --name $(aciName) \
                   --image $(containerRegistry)/$(imageRepository):$(tag) \
                   --dns-name-label $(aciName)-dns \
-	                  --ports 80 443
+                  --ports 80 443
