@@ -62,8 +62,13 @@ stages:
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
-                set -e  # Exit immediately if a command exits with a non-zero status.
+                set -euo pipefail
                 acrPassword=$(ACRPASSWORD)
+
+                echo "Logging in to Azure Container Registry to verify credentials..."
+                az acr login --name $(containerRegistry) --username $(acrUsername) --password $(acrPassword)
+
+                echo "Creating Azure Container Instance..."
                 az container create \
                   --resource-group $(aciResourceGroup) \
                   --name $(aciName) \
@@ -77,5 +82,3 @@ stages:
                   --restart-policy Always \
                   --cpu 1 \
                   --memory 1.5
-            env:
-              ACRPASSWORD: $(acrPassword)
