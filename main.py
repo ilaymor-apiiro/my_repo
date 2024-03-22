@@ -26,7 +26,7 @@ def save_api_call_to_db(subject, mood, style):
     con.commit()
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to(device)
+tts = TTS("xtts_v2").to(device)
 
 model = "gpt-4-0125-preview"
 
@@ -123,7 +123,7 @@ def create_image(sentence, image_path, style, context, client):
     with open(image_path, 'wb') as file:
         file.write(response.content)
 
-    # add_subtitle_to_image(image_path, sentence, image_path)
+    add_subtitle_to_image(image_path, sentence)
 
 
 def create_video_with_speech(sentence, image_file_path, sentence_file_path, clip_file_path):
@@ -133,15 +133,6 @@ def create_video_with_speech(sentence, image_file_path, sentence_file_path, clip
         video_clip = video_clip.set_duration(sentence_audio.duration)
         final_clip = video_clip.set_audio(sentence_audio)
         final_clip.write_videofile(clip_file_path, codec='libx264', audio_codec='aac', fps=24)
-
-
-def add_subtitle_to_image(image_path, subtitle_text, output_path, position=(10, 10), font_size=24, font_color="white"):
-    image = Image.open(image_path)
-    draw = ImageDraw.Draw(image)
-    font = ImageFont.truetype("arial.ttf", font_size)
-    draw.text(position, subtitle_text, font=font, fill=font_color)
-    image.save(output_path)
-
 
 def add_background_music(concatenated_clip, background_music_id):
     background_music = AudioFileClip(f"music/{background_music_id}.mp3")
