@@ -26,7 +26,7 @@ def save_api_call_to_db(subject, mood, style):
     con.commit()
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-tts = TTS("xtts_v2").to(device)
+tts = TTS(model_path="./xtts_v2", config_path="./config.json").to(device)
 
 model = "gpt-4-0125-preview"
 
