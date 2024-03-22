@@ -79,6 +79,6 @@ stages:
                   --registry-username $(acrUsername) \
                   --registry-password $(acrPassword) \
                   --assign-identity \
-                  --restart-policy OnFailue \
+                  --restart-policy OnFailure \
                   --cpu 1 \
                   --memory 1.5

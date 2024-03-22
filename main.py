@@ -123,7 +123,7 @@ def create_image(sentence, image_path, style, context, client):
     with open(image_path, 'wb') as file:
         file.write(response.content)
 
-    add_subtitle_to_image(image_path, sentence)
+    #add_subtitle_to_image(image_path, sentence)
 
 
 def create_video_with_speech(sentence, image_file_path, sentence_file_path, clip_file_path):
