@@ -14,7 +14,7 @@ variables:
   aciResourceGroup: 'ai_development'
   aciName: 'storymaker'
   azureResourceManagerConnection: 'azureResourceManagerConnection'
-  acrUsername: 'mor.ilay@post.runi.ac.il'
+  acrUsername: 'aidevelopmentregistry'
 
 
 stages:
