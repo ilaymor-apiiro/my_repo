@@ -72,5 +72,5 @@ stages:
                   --ports 80 443 \
                   --registry-username $(acrUsername) \
                   --registry-password $acrPassword
-              env:
-                ACRPASSWORD: $(acrPassword)
+            env:
+              ACRPASSWORD: $(acrPassword)
