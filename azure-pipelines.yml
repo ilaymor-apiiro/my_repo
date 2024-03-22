@@ -62,6 +62,8 @@ stages:
               scriptType: bash
               scriptLocation: inlineScript
               inlineScript: |
+                set -e  # Exit immediately if a command exits with a non-zero status.
+                acrPassword=$(ACRPASSWORD)  # Explicitly mapping the secret variable to a script variable
                 az container create \
                   --resource-group $(aciResourceGroup) \
                   --name $(aciName) \
@@ -69,5 +71,6 @@ stages:
                   --dns-name-label $(aciName)-dns \
                   --ports 80 443 \
                   --registry-username $(acrUsername) \
-                  --registry-password $(acrPassword)
-
+                  --registry-password $acrPassword
+              env:
+                ACRPASSWORD: $(acrPassword)
