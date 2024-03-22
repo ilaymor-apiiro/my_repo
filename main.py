@@ -13,8 +13,9 @@ from PIL import Image, ImageDraw, ImageFont
 from fastapi.responses import FileResponse
 from datetime import datetime
 import sqlite3
+import os
 
-DATABASE_URL = "file:apicalls.db"
+DATABASE_URL = "apicalls.db"
 con = sqlite3.connect(DATABASE_URL)
 
 def save_api_call_to_db(subject, mood, style):
