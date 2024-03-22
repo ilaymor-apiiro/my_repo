@@ -46,10 +46,10 @@ g2pkk==0.1.2
 grpcio==1.60.1
 gruut==2.2.3
 gruut-ipa==0.13.0
-gruut-lang-de==2.0.0
-gruut-lang-en==2.0.0
-gruut-lang-es==2.0.0
-gruut-lang-fr==2.0.2
+gruut_lang_de==2.0.0
+gruut_lang_en==2.0.0
+gruut_lang_es==2.0.0
+gruut_lang_fr==2.0.2
 gTTS==2.5.1
 h11==0.14.0
 hangul-romanize==0.1.0
