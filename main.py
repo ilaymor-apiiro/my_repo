@@ -7,18 +7,27 @@ from openai import OpenAI
 import numpy as np
 import torch
 from TTS.api import TTS
-from moviepy.editor import ImageClip, AudioFileClip
+from moviepy.editor import ImageClip, AudioFileClip, VideoFileClip, concatenate_videoclips
 import requests
-from moviepy.editor import VideoFileClip, concatenate_videoclips
 from PIL import Image, ImageDraw, ImageFont
 from fastapi.responses import FileResponse
-from fastapi import HTTPException
+from datetime import datetime
+import sqlite3
+
+DATABASE_URL = "file:apicalls.db"
+con = sqlite3.connect(DATABASE_URL)
+
+def save_api_call_to_db(subject, mood, style):
+    con = sqlite3.connect("DATABASE_URL")
+    cur = con.cursor()
+    cur.execute("CREATE TABLE IF NOT EXISTS apiCalls(id INTEGER PRIMARY KEY AUTOINCREMENT, subject TEXT, mood TEXT, style TEXT, createdAt TEXT)")
+    cur.execute("""INSERT INTO apiCalls (subject, mood, style, createdAt) VALUES (?, ?, ?, ?)""", (subject, mood, style, datetime.now()))
+    con.commit()
 
 device = "cuda" if torch.cuda.is_available() else "cpu"
-tts = TTS(model_path="xtts_v2", config_path="xtts_v2/config.json").to(device)
+tts = TTS("tts_models/multilingual/multi-dataset/xtts_v2").to(device)
 
 model = "gpt-4-0125-preview"
-
 
 class StoryBody(BaseModel):
     subject: str
@@ -26,12 +35,12 @@ class StoryBody(BaseModel):
     style: str
     openaiApiKey: str
 
-
 app = FastAPI()
 
 @app.post("/create")
 async def create_story_video(story_body: StoryBody):
     client = OpenAI(api_key=story_body.openaiApiKey)
+    save_api_call_to_db(subject=story_body.subject, mood=story_body.mood, style=story_body.style)        
     story = await create_story(story_body, client)
     background_music_id = get_background_music_id(f"A {story_body.mood} story about ${story_body.subject}", client)
     create_video(story, background_music_id, story_body.style, story_body.subject, client)
@@ -140,3 +149,19 @@ def add_background_music(concatenated_clip, background_music_id):
     composite_audio = CompositeAudioClip(
         [original_audio, background_music.set_start(0).volumex(0.5)])
     concatenated_clip.audio = composite_audio
+
+def add_subtitle_to_image(image_path,sentence):
+    i = Image.open(image_path)
+    Im = ImageDraw.Draw(i)
+    mf = ImageFont.truetype("arial.ttf", 45)
+
+
+    text = sentence.split()
+    n = 5
+    subtitles='\n '.join([' '.join(text[i:i+n]) for i in range(0,len(text),n)])
+
+
+    Im.text((5,i.height*0.8), subtitles, (255,255,255), font=mf)
+
+
+    i.save(image_path)
